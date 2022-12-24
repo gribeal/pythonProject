@@ -1,16 +1,42 @@
-# This is a sample Python script.
+import requests
+from bs4 import BeautifulSoup
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def get_links(adr):
+    resp_co = requests.get(adr)
+    all_text_co = resp_co.text
+    soup = BeautifulSoup(all_text_co, "html.parser")
+    resp = soup.find_all("a")
+    return resp
+
+new_file = 1
+
+f = open("output" + str(new_file) + ".txt", "w")
+
+mas_links_a_dirt = get_links("https://stihibase.ru/author/")
+
+mas_links_a = []
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+kol_links_a = 0
+kol_links_s = 0
 
+for links_a1 in mas_links_a_dirt:
+    links_a = links_a1.get("href")
+    if "/author/" in links_a and links_a.count("/") == 4 and links_a not in mas_links_a:
+        kol_links_a += 1
+        mas_links_a.append(links_a)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+        mas_links_s_dirt = get_links("https://stihibase.ru" + links_a)
+
+        for links_s1 in mas_links_s_dirt:
+            links_s = links_s1.get("href")
+            if links_s.count("/") == 5:
+                kol_links_s += 1
+                if kol_links_s % 3000 == 0:
+                    new_file += 1
+                    f.close()
+                    f = open("output" + str(new_file) + ".txt", "w")
+                f.write("https://stihibase.ru" + links_s + "\n")
+f.close()
 
 
